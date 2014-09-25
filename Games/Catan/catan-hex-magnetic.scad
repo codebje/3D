@@ -29,13 +29,19 @@ road_y_nook =			5.25;	//catan road width 5+-0.25mm
 ship_x_nook = 			15.5;	//catan ship length (at 1mm depth) ~16
 ship_y_nook =			8.25;	//catan ship width 8+-0.25mm
 
-pieces = 			3;	// was 1
+pieces = 			1;	// was 1
+tester =				false;
 
 ///// constant calculations /////
 
 tile_ri = (tile_s/2*sqrt(3))+tile_play;
+edge_height = support_height + tile_room;// - nook_depth;
+apothem = tile_ri + border_width + corner_lip;
+outer_edge = 2*apothem * tan(30);
 
 ///// main render /////
+intersection() {
+union() {
 for (t = [ 1 : pieces]) {
 	if (t == 1) {
 		tile();
@@ -43,11 +49,18 @@ for (t = [ 1 : pieces]) {
 		// rotate around the outside
 		rotate([0, 0, (t - 2) * 60])
 		// translate out along the y axis
-		translate([0, (tile_ri + border_width + corner_lip)*2, 0])
-		tile();
+		union() {
+			// the tiny subtraction prevents OpenSCAD getting confused by adjoining surfaces
+			translate([0, (tile_ri + border_width + corner_lip)*2 - 0.0001, 0])
+				tile();
+		}
 	} else if (t == 8) {
 		echo("Cannot combine more than 7 pieces together");
 	}
+}
+}
+echo(outer_edge);
+if (tester) translate([0, apothem, 0]) cube([outer_edge+20, 20.5, 10], true);
 }
 
 ///// module definitions /////
