@@ -13,7 +13,7 @@ nook_depth =			1.5;
 corner_nook =			10.5; 	//catan city/settlement width 10+-0.5mm
 road_x_nook = 			25.5;	//catan road length 25+-0.5mm
 road_y_nook =			5.5;	//catan road width 5+-0.5mm
-ship_x_nook = 			16;	//catan ship length (at 1mm depth) ~16
+ship_x_nook = 			16.5;	//catan ship length (at 1mm depth) ~16
 ship_y_nook =			8.5;	//catan ship width 8+-0.5mm
 nook_wall =			1;
 
@@ -47,10 +47,11 @@ for (t = [ 1 : pieces]) {
 	}
 }
 }
-echo(outer_edge);
+
 if (tester) translate([0, apothem, 0]) cube([outer_edge+20, 20.5, 10], true);
 }
 
+// Show a ship for sizing guide
 //rotate([0, 0, 60])
 //translate([
 //	0,
@@ -125,7 +126,7 @@ module tile() {
 		}
 		
 		// magnet holes
-		for (r = [-120, -60, 0, 60, 120, 180]) rotate([0, 0, r]) translate([0, tile_ri+border_width + 8.75, 2.25]) rotate([90, 0, 0]) cylinder(h=10, r=1.75, $fn=100);
+		for (r = [-120, -60, 0, 60, 120, 180]) rotate([0, 0, r]) translate([0, tile_ri+border_width + 8.5, 2.0]) rotate([90, 0, 0]) cylinder(h=10, r=1.75, $fn=100);
 	
 		//settlement/city
 		for (r = [-90,-30,30,90]) rotate([0,0,r]) translate([0,0,support_height+tile_room+10/2-nook_depth]) cube([corner_nook, 150, 10],true);
