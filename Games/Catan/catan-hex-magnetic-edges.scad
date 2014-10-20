@@ -19,8 +19,9 @@ nook_wall =			1;
 
 border_width = 			nook_wall+ship_y_nook/2+0.125;	//was 3 units = 2.598
 
-pieces = 			3;	// was 1
-spacing =			3;	// was 0
+pieces = 			2;	// was 1
+spacing =			0;	// was 0
+edged =				true;
 tester =				false;
 
 ///// constant calculations /////
@@ -30,7 +31,15 @@ edge_height = support_height + tile_room;// - nook_depth;
 apothem = tile_ri + border_width + corner_lip;
 outer_edge = 2*apothem * tan(30);
 
-rotate([0, 0, 180]) main();
+// position for 2 pieces
+rotate([0, 0, 90]) translate([0,-tile_ri-border_width,0])
+
+main();
+
+// a ship tile, for testering, kept here for measurements
+//translate([tile_ri*2+border_width*2+ship_x_nook*2/1.8+12, 0, 0])
+//	linear_extrude(support_height) circle(ship_x_nook/1.8-0.5);
+
 
 ///// main render /////
 
@@ -63,9 +72,87 @@ module main() {
 	//	tile_ri+nook_wall+(ship_y_nook)/2+0.25,
 	//	support_height+tile_room-nook_depth
 	//]) ship();
+
+	// if edged is set, and the number of pieces is two, provide outer edges
+	if (edged && pieces == 2 && spacing == 0) {
+		bay(tile_ri,border_width,support_height+tile_room);
+	}
 }
 
 ///// module definitions /////
+
+module outer_containers(ri,w,h) {
+	s = ri*2/sqrt(3);
+	s2 = (ri+w)*2/sqrt(3);
+
+	// Add an outer container for a road and ship
+	// this is the union of the inverse of the corner nook cubes
+	// less the road/ship dips
+	difference() {
+		border(ri+w,w,h);
+
+		// a 60 degree triangle nomped out of each side, corner_nook wide at the
+		// inner radius
+		for (r = [-150,-90,-30,30,90,150]) rotate([0,0,r]) translate([0,0,h/2+h-nook_depth]) union() {
+			translate([0,s2,0]) cube([corner_nook, 50, h], true);
+			translate([0,s2,0]) rotate([0,0,60]) translate([0,25,0]) cube([corner_nook, 50, h], true);
+			translate([0,s2,0]) rotate([0,0,-60]) translate([0,25,0]) cube([corner_nook, 50, h], true);
+		}
+
+		for (r = [-60,0,60]) rotate([0,0,r]) translate([0,0,h+5-nook_depth])
+			cube([road_x_nook, (ri+w)*2+road_y_nook, 10],true);	
+
+		for (r = [-60,0,60]) rotate([0,0,r]) translate([0,0,h+5-nook_depth])
+			cube([ship_x_nook, (ri+w)*2+ship_y_nook, 10],true);	
+	}
+}
+
+module bay(ri,w,h) {
+	s = ri*2/sqrt(3);
+	s2 = (ri+w)*2/sqrt(3);
+
+	difference() {
+		outer_containers(ri,w,h);
+		rotate([0,0,30])
+			translate([0,-(ri+w)*1.5,-1])
+			cube([ri*2,(ri+w)*3,h+2]);
+		rotate([0,0,60])
+			translate([-ri,-ri-10-w,-1])
+			cube([ri*2,10,h+2]);
+	}
+	translate([0, (ri + w)*2 - 0.0001 + spacing, 0]) {
+		difference() {
+			outer_containers(ri,w,h);
+			rotate([0,0,30])
+				translate([0,-(ri+w)*1.5,-1])
+				cube([ri*2,(ri+w)*3,h+2]);
+			rotate([0,0,180])
+				translate([-ri,-ri-10-w,-1])
+				cube([ri*2,10,h+2]);
+		}
+	}
+
+	// 3xports
+	for (r = [0,-60,-120]) rotate([0,0,r])
+		translate([0,-ri-w*2+0.0001,0]) port();
+
+	// 2x ports
+	for (r = [-60, -120]) translate([0, (ri+w)*2, 0]) rotate([0,0,r])
+		translate([0, -ri-w*2+0.0001, 0]) port();
+}
+
+module port() {
+	s = ship_x_nook;
+	difference() {
+		linear_extrude(support_height) polygon([
+			[0.8*s,-sin(60)*s],
+			[s,0],
+			[-s,0],
+			[-0.8*s,-sin(60)*s]
+		]);
+		translate([0, -s/2-2, -1]) linear_extrude(support_height+2) circle(s/1.8);
+	}
+}
 
 module tub(l, h) {
 	a = l;
