@@ -143,6 +143,55 @@ module minecart() {
 	}
 }
 
+module grain() {
+	minkowski() {
+		hull() {
+			translate([3, 0, 0]) sphere(0.2);
+			sphere(1);
+		}
+		sphere(0.2);
+	}
+}
+module ear() {
+	translate([0,0,0.5]) rotate([0,90,0]) cylinder(d=1,h=7);
+	for (row = [1 : 7]) {
+		translate([2+row*2.5,row*row/21,0.5]) rotate([0,90,row*2]) cylinder(d=1, h=2.5);
+		translate([2+row*2.5,-1+(row*row/21),1]) rotate([0,-25+row*3,-30+row*5]) grain();
+		translate([2+row*2.5,-1+(row*row/21),0]) rotate([0,25-row*3,-30+row*5]) grain();
+		translate([2+row*2.5,1+(row*row/21),1]) rotate([0,-25+row*3,30-row]) grain();
+		translate([2+row*2.5,1+(row*row/21),0]) rotate([0,25-row*3,30-row]) grain();
+	}
+	translate([3+7*2.5,7/3,0.5]) rotate([0,0,14]) grain();
+}
+
+module wheat() {
+	large_base();
+	
+	$fn=10;
+	
+	translate([20,-20,support_height-0.5]) rotate([0,0,90]) ear();
+	translate([24,-22,support_height-0.5]) rotate([0,0,83]) ear();
+	translate([28,-21,support_height-0.5]) rotate([0,0,77]) ear();
+}
+
+module wall() {
+	large_base();
+	
+	translate([25,-22,support_height-0.0001]) rotate([0,0,15])
+	intersection() {
+		union() {
+			cube([3,34,17]);	// "mortar" part
+			for (row = [0:4]) {
+				for (col = [-1:5]) {
+					translate([-0.5, (row % 2) * 2.5 + col * 6.5, row * 3.5])
+						cube([4, 6, 3]);
+				}
+			}
+		}
+		translate([-2,0,0]) cube([6,34,20]);
+	}
+}
+
 module bread() {
 	linear_extrude(support_height) circle(ship_x_nook/1.8-0.5, $fn=100);
 
@@ -189,13 +238,9 @@ module generic() {
 	ratio("3:1");	
 }
 
-//translate([0, ship_x_nook, 0]) minecart();
-// translate([ship_x_nook,0,0]) sheep(); // sheep needs to be printed with supports
-//translate([ship_x_nook,0,0]) generic();
-//translate([-ship_x_nook,0,0]) lumber();
-//translate([0, -ship_x_nook, 0]) bread();
-
-translate([0,30,0]) large_base("3:1");
-translate([0,-30,0]) sheep();
-translate([-50,30,0]) lumber();
-translate([-50,-30,0]) minecart();
+// other: sheep(), minecart(), lumber()
+translate([0,60,0]) large_base("3:1");
+large_base("3:1");
+translate([0,-60,0]) large_base("3:1");
+translate([-50,30,0]) wheat();
+translate([-50,-30,0]) wall();
